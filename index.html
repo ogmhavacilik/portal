@@ -159,31 +159,31 @@
                     <span class="text-white font-bold text-lg tracking-wider text-center">HAVA ARAÇLARI DURUM</span>
                 </button>
 
-                <!-- TASKLINE -->
-                <button onclick="openSystem('https://ogmbakimsube-taskline.netlify.app/', 'TASKLINE')" 
+                <!-- PERSONEL (ESKİ YOKLAMA) -->
+                <button onclick="openSystem('https://bakimsube-yoklama.netlify.app/', 'PERSONEL')" 
                         class="glass-card flex flex-col items-center p-8 rounded-3xl group">
                     <div class="bg-white/10 p-5 rounded-2xl group-hover:bg-white/20 transition-all mb-4">
-                        <i data-lucide="clipboard-list" class="w-10 h-10 text-white"></i>
+                        <i data-lucide="users" class="w-10 h-10 text-white"></i>
                     </div>
-                    <span class="text-white font-bold text-lg tracking-wider">TASKLINE</span>
+                    <span class="text-white font-bold text-lg tracking-wider">PERSONEL</span>
                 </button>
 
-                <!-- YOKLAMA -->
-                <button onclick="openSystem('https://bakimsube-yoklama.netlify.app/', 'YOKLAMA')" 
+                <!-- İKMAL (YENİ) -->
+                <button onclick="openCategory('İKMAL')" 
                         class="glass-card flex flex-col items-center p-8 rounded-3xl group">
                     <div class="bg-white/10 p-5 rounded-2xl group-hover:bg-white/20 transition-all mb-4">
-                        <i data-lucide="user-check" class="w-10 h-10 text-white"></i>
+                        <i data-lucide="package" class="w-10 h-10 text-white"></i>
                     </div>
-                    <span class="text-white font-bold text-lg tracking-wider">YOKLAMA</span>
+                    <span class="text-white font-bold text-lg tracking-wider">İKMAL</span>
                 </button>
 
-                <!-- YAKIT -->
-                <button onclick="openSystem('https://ogmhavacilik-takipsistem.netlify.app/', 'YAKIT')" 
+                <!-- BAKIM TAKİP (YENİ) -->
+                <button onclick="openCategory('BAKIM TAKİP')" 
                         class="glass-card flex flex-col items-center p-8 rounded-3xl group">
                     <div class="bg-white/10 p-5 rounded-2xl group-hover:bg-white/20 transition-all mb-4">
-                        <i data-lucide="fuel" class="w-10 h-10 text-white"></i>
+                        <i data-lucide="settings" class="w-10 h-10 text-white"></i>
                     </div>
-                    <span class="text-white font-bold text-lg tracking-wider">YAKIT</span>
+                    <span class="text-white font-bold text-lg tracking-wider">BAKIM TAKİP</span>
                 </button>
 
             </div>
@@ -220,6 +220,11 @@
                 <h3 class="text-2xl font-bold text-[#0b3d1d]">TASARIM AŞAMASINDA</h3>
                 <p class="text-gray-500 mt-2">Bu modül üzerinde çalışmalar devam etmektedir.</p>
             </div>
+            <div id="category-menu-content" class="hidden absolute inset-0 flex items-center justify-center bg-[#f8fafc] p-8 overflow-y-auto">
+                <div id="category-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-4xl">
+                    <!-- Dinamik Butonlar -->
+                </div>
+            </div>
             <iframe id="system-iframe" src="" class="w-full h-full border-none" onload="document.getElementById('iframe-loader').style.display='none'"></iframe>
         </div>
     </div>
@@ -245,16 +250,18 @@
             }, 5000);
         });
 
-        function showDesignPhase() {
+        function showDesignPhase(title) {
             const modal = document.getElementById('system-modal');
             const iframe = document.getElementById('system-iframe');
             const modalTitle = document.getElementById('modal-title');
             const loader = document.getElementById('iframe-loader');
             const designMsg = document.getElementById('design-phase-content');
+            const categoryMenu = document.getElementById('category-menu-content');
 
-            modalTitle.innerText = "HAVA ARAÇLARI DURUM";
+            modalTitle.innerText = title || "TASARIM AŞAMASINDA";
             loader.style.display = 'none';
             iframe.style.display = 'none';
+            categoryMenu.style.display = 'none';
             designMsg.style.display = 'flex';
             
             modal.style.display = 'flex';
@@ -263,17 +270,64 @@
             }, 10);
         }
 
+        function openCategory(category) {
+            const modal = document.getElementById('system-modal');
+            const iframe = document.getElementById('system-iframe');
+            const modalTitle = document.getElementById('modal-title');
+            const loader = document.getElementById('iframe-loader');
+            const designMsg = document.getElementById('design-phase-content');
+            const categoryMenu = document.getElementById('category-menu-content');
+            const categoryButtons = document.getElementById('category-buttons');
+
+            modalTitle.innerText = category.toUpperCase();
+            loader.style.display = 'none';
+            iframe.style.display = 'none';
+            designMsg.style.display = 'none';
+            categoryMenu.style.display = 'flex';
+            
+            categoryButtons.innerHTML = ''; 
+
+            if (category === 'İKMAL') {
+                addCategoryButton('İŞ TAKİP', 'clipboard-list', () => openSystem('https://ogmbakimsube-taskline.netlify.app/', 'İŞ TAKİP'));
+                addCategoryButton('YAKIT', 'fuel', () => window.open('https://ogmhavacilik-takipsistem.netlify.app/', '_blank'));
+            } else if (category === 'BAKIM TAKİP') {
+                addCategoryButton('KALİBRASYONLU MALZEMELER LİSTESİ', 'wrench', () => showDesignPhase('KALİBRASYONLU MALZEMELER LİSTESİ'));
+                addCategoryButton('PERİYODİK BAKIM TAKİP LİSTESİ', 'calendar-check', () => showDesignPhase('PERİYODİK BAKIM TAKİP LİSTESİ'));
+            }
+
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        function addCategoryButton(text, icon, onClick) {
+            const btn = document.createElement('button');
+            btn.className = 'glass-card flex flex-col items-center p-8 rounded-3xl group bg-white border-gray-200 shadow-sm hover:shadow-md';
+            btn.onclick = onClick;
+            btn.innerHTML = `
+                <div class="bg-[#0b3d1d]/10 p-5 rounded-2xl group-hover:bg-[#0b3d1d]/20 transition-all mb-4">
+                    <i data-lucide="${icon}" class="w-10 h-10 text-[#0b3d1d]"></i>
+                </div>
+                <span class="text-[#0b3d1d] font-bold text-lg tracking-wider text-center">${text}</span>
+            `;
+            document.getElementById('category-buttons').appendChild(btn);
+            lucide.createIcons();
+        }
+
         function openSystem(url, title) {
             const modal = document.getElementById('system-modal');
             const iframe = document.getElementById('system-iframe');
             const modalTitle = document.getElementById('modal-title');
             const loader = document.getElementById('iframe-loader');
             const designMsg = document.getElementById('design-phase-content');
+            const categoryMenu = document.getElementById('category-menu-content');
 
             modalTitle.innerText = title;
             loader.style.display = 'flex';
             iframe.style.display = 'block';
             designMsg.style.display = 'none';
+            categoryMenu.style.display = 'none';
             iframe.src = url;
             
             modal.style.display = 'flex';
